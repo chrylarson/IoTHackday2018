@@ -48,6 +48,6 @@ while True:
     key = max(device_list.items(), key=operator.itemgetter(1))[0]
     value = device_list[key]
     #first = ScanBLE().firstItem(device_list)
-    print('Device Location ' + (ScanBLE().idToName(key) + ', Distance=' + ScanBLE().rssiToFeet(value)) + ' Feet')
+    print('Device Location ' + str(ScanBLE().idToName(key)) + ', Distance=' + str(ScanBLE().rssiToFeet(value)) + ' Feet')
 
     time.sleep(1)
