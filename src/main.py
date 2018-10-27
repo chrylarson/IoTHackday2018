@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from bluepy.btle import Scanner, DefaultDelegate
+from guizero import App, Text, TextBox, PushButton, Slider, Picture, Waffle
 import time
 import config
 import operator
@@ -9,12 +10,6 @@ class ScanBLE(DefaultDelegate):
     def __init__(self, iface=0):
         DefaultDelegate.__init__(self)
 
-    # def handleDiscovery(self, scanEntry, isNewDev, isNewData):
-    #     if isNewDev:
-    #         print "New ID: ", self.idToName(scanEntry.addr), " RSSI: ", self.rssiToFeet(scanEntry.rssi)
-    #     elif isNewData:
-    #         print "Old ID: ", self.idToName(scanEntry.addr), " RSSI: ", self.rssiToFeet(scanEntry.rssi)
-    
     # ID -> Name
     def idToName(self, id):
         if id in config.BEACON_MAP:
@@ -35,8 +30,23 @@ class ScanBLE(DefaultDelegate):
         return {key: value}
 
 scan = Scanner().withDelegate(ScanBLE())
+location = ""
 
-while True:
+app = App(title="Hello world", width=960, height=420)
+
+welcome_message = Text(app, text="Welcome to the Mobile Nurse App")
+
+def say_my_name():
+    welcome_message.value = location
+
+def change_text_size(slider_value):
+    welcome_message.size = slider_value
+
+text_size = Slider(app, command=change_text_size, start=10, end=80)
+
+my_map = Picture(app, image="map.png", width=900, height=350)
+
+def loopIt():
     device_list  = {}
     devices = scan.scan(4.0)
 
@@ -44,10 +54,11 @@ while True:
       if dev.addr in config.BEACON_MAP:
         device_list[dev.addr] = dev.rssi
     
-    #device_list = sorted(device_list.iteritems(), key=lambda (k,v): (v,k), reverse=True)
     key = max(device_list.items(), key=operator.itemgetter(1))[0]
     value = device_list[key]
-    #first = ScanBLE().firstItem(device_list)
-    print('Device Location ' + str(ScanBLE().idToName(key)) + ', Distance=' + str(ScanBLE().rssiToFeet(value)) + ' Feet')
+    location = 'Device Location ' + str(ScanBLE().idToName(key)) + ', Distance=' + str(ScanBLE().rssiToFeet(value)) + ' Feet'
+    welcome_message.value = location
+    print(location)
 
-    time.sleep(1)
+welcome_message.repeat(5000, loopIt)
+app.display()
